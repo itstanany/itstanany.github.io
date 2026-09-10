@@ -1,38 +1,566 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tanany — Android Apps</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ahmed Ramadan Tanany — Android Software Engineer</title>
+<meta name="description" content="Android Software Engineer in Cairo, Egypt. Kotlin, Jetpack Compose, Kotlin Multiplatform. Shipping production apps on Google Play.">
+<meta name="theme-color" content="#0b0b0f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f4f4f7" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://itstanany.github.io/">
+
+<!-- Open Graph: this page gets pasted into chats and ATS notes. -->
+<meta property="og:type" content="profile">
+<meta property="og:title" content="Ahmed Ramadan Tanany — Android Software Engineer">
+<meta property="og:description" content="Kotlin · Jetpack Compose · Kotlin Multiplatform. Production Android apps on Google Play.">
+<meta property="og:url" content="https://itstanany.github.io/">
+
 <style>
-  :root { color-scheme: light dark; }
-  body {
-    margin: 0; padding: 3rem 1.25rem;
-    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-    max-width: 34rem; margin-inline: auto;
+/* ============================================================
+   The page is a phone. The frame is chrome on desktop and
+   disappears on a real phone, where the content already IS
+   the app. One file, no frameworks, no CDN.
+   ============================================================ */
+:root {
+  --bg: #eceef3;
+  --frame: #0e0e12;
+  --surface: #ffffff;
+  --surface-2: #f6f7fa;
+  --text: #14161c;
+  --text-dim: #5c6270;
+  --line: rgba(20, 22, 28, .1);
+  --accent: #2f6df6;
+  --accent-ink: #ffffff;
+  --chip: #eef2fb;
+  --ok: #1a7f4b;
+  --radius: 18px;
+  --safe: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #06070a;
+    --frame: #000;
+    --surface: #12141a;
+    --surface-2: #191c24;
+    --text: #eceef3;
+    --text-dim: #9aa2b1;
+    --line: rgba(236, 238, 243, .12);
+    --accent: #6f9bff;
+    --accent-ink: #08101f;
+    --chip: #1d2230;
+    --ok: #58d69a;
   }
-  h1 { font-size: 1.5rem; margin: 0 0 .25rem; }
-  p.sub { margin: 0 0 2rem; opacity: .7; }
-  ul { list-style: none; padding: 0; }
-  li { padding: .75rem 0; border-top: 1px solid rgba(128,128,128,.3); }
-  a { color: inherit; }
-  footer { margin-top: 2.5rem; font-size: .875rem; opacity: .6; }
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+}
+
+/* ---------- the device ---------- */
+.device {
+  width: 100%;
+  max-width: 430px;
+  background: var(--frame);
+  border-radius: 44px;
+  padding: 10px;
+  box-shadow: 0 40px 80px -20px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.06) inset;
+}
+.screen {
+  position: relative;
+  background: var(--surface);
+  border-radius: 36px;
+  overflow: hidden;
+  height: min(84vh, 780px);
+  display: flex;
+  flex-direction: column;
+}
+
+/* status bar — sells the illusion, costs 3 lines */
+.status {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 22px 4px;
+  font-size: 12px; font-weight: 600; color: var(--text-dim);
+  letter-spacing: .02em;
+}
+.status .dots { display: flex; gap: 3px; align-items: center; }
+.status .dots i {
+  width: 3px; border-radius: 1px; background: currentColor; display: block;
+}
+.status .dots i:nth-child(1) { height: 5px; }
+.status .dots i:nth-child(2) { height: 7px; }
+.status .dots i:nth-child(3) { height: 9px; }
+.status .dots i:nth-child(4) { height: 11px; }
+.battery {
+  width: 22px; height: 11px; border: 1.5px solid currentColor;
+  border-radius: 3px; position: relative;
+}
+.battery::after {
+  content: ""; position: absolute; inset: 2px auto 2px 2px;
+  width: 12px; background: currentColor; border-radius: 1px;
+}
+
+/* ---------- app bar ---------- */
+.appbar {
+  padding: 8px 20px 14px;
+  display: flex; align-items: center; gap: 14px;
+  border-bottom: 1px solid var(--line);
+}
+.avatar {
+  width: 46px; height: 46px; flex: none; border-radius: 50%;
+  background: linear-gradient(145deg, var(--accent), #9b6bff);
+  color: #fff; display: grid; place-items: center;
+  font-weight: 700; font-size: 17px; letter-spacing: .02em;
+}
+.who { min-width: 0; }
+.who h1 { margin: 0; font-size: 16px; line-height: 1.25; letter-spacing: -.01em; }
+.who p { margin: 1px 0 0; font-size: 12.5px; color: var(--text-dim); }
+
+/* ---------- scrolling content ---------- */
+main {
+  flex: 1; overflow-y: auto; overscroll-behavior: contain;
+  padding: 16px 16px 8px;
+  -webkit-overflow-scrolling: touch;
+}
+.tabpanel[hidden] { display: none; }
+.tabpanel { animation: rise .22s ease both; }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+
+h2.sec {
+  margin: 4px 2px 10px;
+  font-size: 11px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--text-dim);
+}
+.card {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px 15px;
+  margin-bottom: 10px;
+}
+.card h3 { margin: 0 0 2px; font-size: 14.5px; letter-spacing: -.01em; }
+.card .meta { font-size: 12px; color: var(--text-dim); margin: 0 0 8px; }
+.card p { margin: 0 0 8px; font-size: 13.5px; }
+.card p:last-child { margin-bottom: 0; }
+.card ul { margin: 0; padding-left: 17px; font-size: 13.5px; }
+.card li { margin-bottom: 6px; }
+.card li:last-child { margin-bottom: 0; }
+
+.badge {
+  display: inline-block; font-size: 11px; font-weight: 600;
+  background: var(--chip); color: var(--text);
+  padding: 3px 9px; border-radius: 999px; margin: 0 4px 4px 0;
+}
+.badge.live { color: var(--ok); }
+
+/* list rows, the way an app shows links */
+.row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; margin-bottom: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--line); border-radius: 14px;
+  color: inherit; text-decoration: none;
+  transition: transform .12s ease, border-color .12s ease;
+}
+.row:hover, .row:focus-visible { transform: translateY(-1px); border-color: var(--accent); outline: none; }
+.row .ico {
+  width: 32px; height: 32px; flex: none; border-radius: 9px;
+  background: var(--chip); display: grid; place-items: center; font-size: 15px;
+}
+.row .lbl { flex: 1; min-width: 0; }
+.row .lbl b { display: block; font-size: 13.5px; font-weight: 600; }
+/* break only unbreakable strings (URLs), never mid-word in prose */
+.row .lbl span { font-size: 11.5px; color: var(--text-dim); word-break: normal; overflow-wrap: break-word; }
+.row .go { color: var(--text-dim); font-size: 17px; line-height: 1; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  font-size: 12px; padding: 5px 10px; border-radius: 999px;
+  background: var(--chip); border: 1px solid var(--line);
+}
+
+/* ---------- bottom navigation ---------- */
+nav {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+  padding-bottom: var(--safe);
+}
+nav button {
+  appearance: none; border: 0; background: none; cursor: pointer;
+  padding: 9px 2px 11px; color: var(--text-dim);
+  font: inherit; font-size: 10.5px; font-weight: 600;
+  display: grid; gap: 3px; justify-items: center;
+  transition: color .14s ease;
+}
+nav button svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+nav button[aria-selected="true"] { color: var(--accent); }
+nav button[aria-selected="true"] .pill { background: var(--accent); }
+.pill { width: 20px; height: 3px; border-radius: 2px; background: transparent; }
+nav button:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; border-radius: 10px; }
+
+footer.legal {
+  text-align: center; font-size: 11.5px; color: var(--text-dim);
+  margin-top: 14px;
+}
+footer.legal a { color: inherit; }
+
+/* On a real phone the frame is noise — drop it and let the app fill the glass. */
+@media (max-width: 520px) {
+  body { padding: 0; display: block; }
+  .device { max-width: none; border-radius: 0; padding: 0; box-shadow: none; }
+  .screen { border-radius: 0; height: 100vh; height: 100dvh; }
+  footer.legal { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tabpanel { animation: none; }
+  .row { transition: none; }
+}
 </style>
 </head>
 <body>
-  <h1>Tanany</h1>
-  <p class="sub">Android apps published on Google Play.</p>
-  <ul>
-    <li>
-      <a href="https://play.google.com/store/apps/details?id=com.tanany365.odontoo">Odonto Connect</a>
-      — a communication facilitator for dentists, built around privacy.
-    </li>
-    <li>
-      <a href="https://play.google.com/store/apps/dev?id=8955092533742702461">All apps on Google Play</a>
-    </li>
-  </ul>
-  <footer>
-    Contact: <a href="mailto:ahmadalymohamad@gmail.com">ahmadalymohamad@gmail.com</a>
-  </footer>
+
+<div class="device">
+  <div class="screen">
+
+    <div class="status" aria-hidden="true">
+      <span>Cairo</span>
+      <span class="dots"><i></i><i></i><i></i><i></i></span>
+      <span class="battery"></span>
+    </div>
+
+    <header class="appbar">
+      <div class="avatar" aria-hidden="true">AT</div>
+      <div class="who">
+        <h1>Ahmed Ramadan Tanany</h1>
+        <p>Android Software Engineer · Cairo, Egypt</p>
+      </div>
+    </header>
+
+    <main>
+      <!-- ========== PROFILE ========== -->
+      <section id="p-profile" class="tabpanel" role="tabpanel" aria-labelledby="t-profile">
+        <h2 class="sec">About</h2>
+        <div class="card">
+          <p>Android engineer with <strong>4+ years</strong> building production apps in
+          Kotlin, Jetpack Compose and Clean Architecture. I work across payments,
+          checkout and offline-first data, and I lead migrations — Kotlin Multiplatform,
+          Compose Multiplatform, and RxJava to Coroutines.</p>
+          <p>On a <strong>100K+</strong>-download storefront I led the Android checkout
+          rebuild, which lifted conversion <strong>27%</strong>, and own its
+          <strong>Fawry</strong> and <strong>Paymob</strong> card and POS payment
+          integration.</p>
+          <p>Clinical background (B.D.S., graduated with honors) before moving into
+          software. I also design and evaluate multi-agent AI workflows for code review
+          and UI generation.</p>
+        </div>
+
+        <h2 class="sec">Focus</h2>
+        <div class="card">
+          <span class="badge">Kotlin</span>
+          <span class="badge">Jetpack Compose</span>
+          <span class="badge">Kotlin Multiplatform</span>
+          <span class="badge">Compose Multiplatform</span>
+          <span class="badge">Payments &amp; checkout</span>
+          <span class="badge">Design systems</span>
+        </div>
+
+        <h2 class="sec">Links</h2>
+        <a class="row" href="https://itstanany.github.io/in">
+          <span class="ico" aria-hidden="true">in</span>
+          <span class="lbl"><b>LinkedIn</b><span>itstanany.github.io/in</span></span>
+          <span class="go" aria-hidden="true">›</span>
+        </a>
+        <a class="row" href="https://github.com/itstanany">
+          <span class="ico" aria-hidden="true">&lt;/&gt;</span>
+          <span class="lbl"><b>GitHub</b><span>github.com/itstanany</span></span>
+          <span class="go" aria-hidden="true">›</span>
+        </a>
+        <a class="row" href="mailto:itstanany@gmail.com">
+          <span class="ico" aria-hidden="true">✉</span>
+          <span class="lbl"><b>Email</b><span>itstanany@gmail.com</span></span>
+          <span class="go" aria-hidden="true">›</span>
+        </a>
+
+        <h2 class="sec">Availability</h2>
+        <div class="card">
+          <p class="meta" style="margin:0">Arabic (native) · English (professional working
+          proficiency) · Military service exempted · Open to relocation: Gulf, Europe, USA</p>
+        </div>
+      </section>
+
+      <!-- ========== EXPERIENCE ========== -->
+      <section id="p-work" class="tabpanel" role="tabpanel" aria-labelledby="t-work" hidden>
+        <h2 class="sec">Experience</h2>
+
+        <div class="card">
+          <h3>Robusta Studio</h3>
+          <p class="meta">Android Software Engineer · Jan 2025 – present · Remote, Egypt</p>
+          <ul>
+            <li>Led delivery of the <strong>Mazaya Stores</strong> Android app, a
+            <strong>100K+</strong>-download Magento storefront, where checkout conversion
+            rose <strong>27%</strong> and active installs grew <strong>20%</strong> over
+            the same period. <strong>~1,090 commits</strong> across 20+ Gradle modules in
+            16 months.</li>
+            <li>Led the migration of an already-shipping app into a white-label
+            <strong>Compose Multiplatform</strong> product on <strong>Android and
+            iOS</strong>, moving legacy screens onto a 3-tier tokenized design system
+            that is themeable per brand. <strong>71 MRs</strong>,
+            <strong>40+ screens</strong>.</li>
+            <li>Led the full Android checkout rebuild — cart, unified payment summary,
+            shipping and payment methods — and own <strong>Fawry</strong> and
+            <strong>Paymob</strong> card and <strong>POS</strong> integration end to end.</li>
+            <li>Leading the same app's migration to <strong>Kotlin Multiplatform</strong> —
+            off Fragment-based navigation, Compose hosted in Fragments, and RxJava, onto
+            Coroutines — moving its 110 use cases into <code>commonMain</code> and
+            reviewing the <strong>47-MR</strong> chain.</li>
+            <li>Own the Packer, Captain and Courier modules of the Mazaya Operations app
+            (Clean Architecture, Compose, Flow, MVI, Koin), cutting operational time
+            <strong>20%</strong> over <strong>484 commits</strong> as top contributor by
+            <strong>3.7x</strong>; designed its push-notification stack from scratch.</li>
+            <li>Own the Android release cycle: certificate pinning with rotation, Android
+            Keystore, ProGuard/R8, Play Console publishing and release notes.</li>
+            <li>Instrumented the app's full analytics event surface (Firebase, Facebook,
+            TikTok) for product and business funnel metrics, and ran Mazaya Operations
+            demos for employees and Mazaya HQ.</li>
+            <li>Architected a 3-agent Figma-to-code pipeline with a human approval gate,
+            and a schema-constrained AI code-review tool primed on
+            <strong>233</strong> mined reviewer comments.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>Manzoma Technology Solution</h3>
+          <p class="meta">Android Software Engineer · Dec 2023 – Dec 2024 · Cairo, Egypt</p>
+          <ul>
+            <li>Sole Android developer for three production apps at a product company
+            serving government clients.</li>
+            <li>Refactored a legacy Java/XML codebase to Clean Architecture with MVVM/MVI,
+            <strong>Dagger2</strong> and <strong>Hilt</strong>, moving callback-based data
+            fetching onto Kotlin Coroutines.</li>
+            <li>Performance optimization work cut startup time <strong>25%</strong>
+            (TTFD, 1160&nbsp;ms to 871&nbsp;ms) and data loading <strong>85%</strong> by
+            caching static content. Built an internal Android SDK, an offline-first Room
+            app, and real-time notifications over Microsoft SignalR.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>Contractor / Freelancer</h3>
+          <p class="meta">Android Software Engineer · Aug 2022 – Nov 2023 · Remote</p>
+          <ul>
+            <li><strong>Humenz</strong> customer and pro apps for a Saudi client — revamped
+            onto Jetpack Compose, Coroutines and Navigation Compose on a
+            <strong>Hilt</strong> codebase; built in-app calls with Broadcast Receivers.</li>
+            <li><strong>Odonto</strong>, a self-initiated dental-health app: market research
+            through SRS, prioritized roadmap, analytics, Clean Architecture.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>Open Source</h3>
+          <p class="meta">Sep 2023 – present</p>
+          <ul>
+            <li>Contributor to Google's <strong>android-fhir</strong> SDK, the Kotlin SDK
+            behind offline-capable HL7 FHIR healthcare apps.</li>
+            <li>Added features to Jetpack Compose <strong>Country Code Picker</strong> and
+            reviewed its pull requests.</li>
+          </ul>
+        </div>
+
+        <h2 class="sec">Education &amp; Certification</h2>
+        <div class="card">
+          <h3>B.D.S. (Bachelor's Degree) — graduated with honors</h3>
+          <p class="meta">Ain Shams University, Cairo · Jul 2023</p>
+          <p style="margin:0"><span class="badge">Meta Android Developer Professional
+          Certificate</span><span class="badge">UX Research Nanodegree — Udacity</span></p>
+        </div>
+      </section>
+
+      <!-- ========== PROJECTS ========== -->
+      <section id="p-apps" class="tabpanel" role="tabpanel" aria-labelledby="t-apps" hidden>
+        <h2 class="sec">On Google Play</h2>
+        <a class="row" href="https://play.google.com/store/apps/details?id=com.mazayastores.android">
+          <span class="ico" aria-hidden="true">🛍</span>
+          <span class="lbl"><b>Mazaya Stores</b><span>100K+ downloads · e-commerce, checkout, payments</span></span>
+          <span class="go" aria-hidden="true">›</span>
+        </a>
+        <a class="row" href="https://play.google.com/store/apps/details?id=com.humenz.app.customer">
+          <span class="ico" aria-hidden="true">📱</span>
+          <span class="lbl"><b>Humenz — Customer</b><span>Compose revamp · Saudi client</span></span>
+          <span class="go" aria-hidden="true">›</span>
+        </a>
+        <a class="row" href="https://play.google.com/store/apps/details?id=com.humenz.app.pro">
+          <span class="ico" aria-hidden="true">🧰</span>
+          <span class="lbl"><b>Humenz — Pro</b><span>In-app calls · Broadcast Receivers</span></span>
+          <span class="go" aria-hidden="true">›</span>
+        </a>
+        <a class="row" href="https://play.google.com/store/apps/details?id=com.tanany365.odontoo">
+          <span class="ico" aria-hidden="true">🦷</span>
+          <span class="lbl"><b>Odonto Connect</b><span>Self-initiated dental-health app</span></span>
+          <span class="go" aria-hidden="true">›</span>
+        </a>
+
+        <h2 class="sec">Personal Project</h2>
+        <div class="card">
+          <h3>StoreFront — on-device generative UI</h3>
+          <p class="meta">Kotlin Multiplatform · Android + iOS · in progress</p>
+          <p>A KMP + Compose Multiplatform storefront whose UI is generated rather than
+          hard-coded: on-device signals infer a baseline layout, free-text commands
+          override it per dimension, and each override decays on a TTL.</p>
+          <p style="margin:0"><span class="badge">86% shared code</span><span class="badge">327
+          test functions</span><span class="badge">Gemini Nano</span><span class="badge">Apple
+          Foundation Models</span><span class="badge">llama.cpp</span><span class="badge">SQLDelight
+          + SQLCipher</span></p>
+        </div>
+        <a class="row" href="https://github.com/itstanany/StoreFront">
+          <span class="ico" aria-hidden="true">&lt;/&gt;</span>
+          <span class="lbl"><b>Source on GitHub</b><span>github.com/itstanany/StoreFront</span></span>
+          <span class="go" aria-hidden="true">›</span>
+        </a>
+
+        <h2 class="sec">Open Source</h2>
+        <a class="row" href="https://github.com/google/android-fhir/commits?author=itstanany">
+          <span class="ico" aria-hidden="true">🏥</span>
+          <span class="lbl"><b>google/android-fhir</b><span>HL7 FHIR Kotlin SDK · my commits</span></span>
+          <span class="go" aria-hidden="true">›</span>
+        </a>
+        <a class="row" href="https://github.com/jump-sdk/jetpack_compose_country_code_picker_emoji/commits?author=itstanany">
+          <span class="ico" aria-hidden="true">🌍</span>
+          <span class="lbl"><b>Country Code Picker</b><span>Jetpack Compose library · my commits</span></span>
+          <span class="go" aria-hidden="true">›</span>
+        </a>
+      </section>
+
+      <!-- ========== SKILLS ========== -->
+      <section id="p-skills" class="tabpanel" role="tabpanel" aria-labelledby="t-skills" hidden>
+        <h2 class="sec">Languages &amp; Android</h2>
+        <div class="card"><div class="chips">
+          <span class="chip">Kotlin</span><span class="chip">Java</span><span class="chip">Dart</span>
+          <span class="chip">Android SDK</span><span class="chip">Jetpack Compose</span>
+          <span class="chip">Compose Multiplatform</span><span class="chip">Kotlin Multiplatform</span>
+          <span class="chip">Kotlin/Native</span><span class="chip">Design Systems</span>
+          <span class="chip">i18n</span><span class="chip">RTL / Arabic</span>
+          <span class="chip">Paging</span><span class="chip">Navigation</span>
+        </div></div>
+
+        <h2 class="sec">Architecture &amp; Concurrency</h2>
+        <div class="card"><div class="chips">
+          <span class="chip">Clean Architecture</span><span class="chip">Multi-module</span>
+          <span class="chip">MVVM</span><span class="chip">MVI</span><span class="chip">MVP</span>
+          <span class="chip">Coroutines</span><span class="chip">Flow</span><span class="chip">StateFlow</span>
+          <span class="chip">Structured Concurrency</span><span class="chip">RxJava2</span>
+          <span class="chip">Koin</span><span class="chip">Hilt</span><span class="chip">Dagger2</span>
+        </div></div>
+
+        <h2 class="sec">Data &amp; Networking</h2>
+        <div class="card"><div class="chips">
+          <span class="chip">Retrofit</span><span class="chip">OkHttp</span><span class="chip">Ktor</span>
+          <span class="chip">REST</span><span class="chip">GraphQL</span><span class="chip">Apollo</span>
+          <span class="chip">Room</span><span class="chip">SQLDelight</span><span class="chip">SQLCipher</span>
+          <span class="chip">DataStore</span><span class="chip">Firebase</span>
+          <span class="chip">SignalR</span><span class="chip">Maps &amp; Places</span>
+          <span class="chip">offline-first</span>
+        </div></div>
+
+        <h2 class="sec">Commerce &amp; Payments</h2>
+        <div class="card"><div class="chips">
+          <span class="chip">Fawry card &amp; POS</span><span class="chip">Paymob</span>
+          <span class="chip">payment-success reconciliation</span><span class="chip">Magento</span>
+          <span class="chip">checkout &amp; cart</span><span class="chip">loyalty points</span>
+          <span class="chip">coupon / promo funnels</span><span class="chip">order management</span>
+        </div></div>
+
+        <h2 class="sec">Testing, Security &amp; Release</h2>
+        <div class="card"><div class="chips">
+          <span class="chip">JUnit</span><span class="chip">MockK</span><span class="chip">Mockito</span>
+          <span class="chip">Espresso</span><span class="chip">UI Automator</span>
+          <span class="chip">Roborazzi</span><span class="chip">architecture tests</span>
+          <span class="chip">SonarQube</span><span class="chip">Android Keystore</span>
+          <span class="chip">SSL/TLS pinning</span><span class="chip">AES-256-GCM</span>
+          <span class="chip">Threat modeling</span><span class="chip">ProGuard/R8</span>
+          <span class="chip">Gradle</span><span class="chip">GitLab CI</span>
+          <span class="chip">Fastlane</span><span class="chip">Play Console</span>
+        </div></div>
+
+        <h2 class="sec">AI-Directed Engineering</h2>
+        <div class="card"><div class="chips">
+          <span class="chip">Agent orchestration</span><span class="chip">Multi-agent workflows</span>
+          <span class="chip">Schema-constrained code review</span>
+          <span class="chip">Anti-hallucination guardrails</span>
+          <span class="chip">On-device LLM inference</span>
+        </div></div>
+      </section>
+    </main>
+
+    <nav role="tablist" aria-label="Sections">
+      <button role="tab" id="t-profile" aria-controls="p-profile" aria-selected="true">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20c1.3-3.6 4-5.4 7.5-5.4S18.2 16.4 19.5 20"/></svg>
+        Profile<span class="pill"></span>
+      </button>
+      <button role="tab" id="t-work" aria-controls="p-work" aria-selected="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7"/></svg>
+        Work<span class="pill"></span>
+      </button>
+      <button role="tab" id="t-apps" aria-controls="p-apps" aria-selected="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10.8 18.6h2.4"/></svg>
+        Apps<span class="pill"></span>
+      </button>
+      <button role="tab" id="t-skills" aria-controls="p-skills" aria-selected="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 15.5 4 11l4.5-4.5M15.5 6.5 20 11l-4.5 4.5M13.5 4l-3 14"/></svg>
+        Skills<span class="pill"></span>
+      </button>
+    </nav>
+
+  </div>
+</div>
+
+<footer class="legal">
+  Built from my CV · <a href="https://github.com/itstanany">github.com/itstanany</a>
+</footer>
+
+<script>
+(function () {
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
+  var main = document.querySelector('main');
+
+  function select(tab) {
+    tabs.forEach(function (t) {
+      var on = t === tab;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+    });
+    main.scrollTop = 0;
+    // Keep the tab in the URL so a section can be linked and reloaded.
+    try { history.replaceState(null, '', '#' + tab.id.replace('t-', '')); } catch (e) {}
+  }
+
+  tabs.forEach(function (tab, i) {
+    tab.addEventListener('click', function () { select(tab); });
+    // Arrow-key movement is what makes a tablist actually usable by keyboard.
+    tab.addEventListener('keydown', function (e) {
+      var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (!d) return;
+      e.preventDefault();
+      var next = tabs[(i + d + tabs.length) % tabs.length];
+      next.focus();
+      select(next);
+    });
+  });
+
+  var want = (location.hash || '').replace('#', '');
+  if (want) {
+    var match = document.getElementById('t-' + want);
+    if (match) select(match);
+  }
+})();
+</script>
 </body>
 </html>
