@@ -129,6 +129,13 @@ body {
    seam where two separately-painted gradients would meet. */
 .hero {
   background: linear-gradient(118deg, var(--accent) 0%, #7c4ef0 48%, var(--accent-2) 135%);
+  /* Slow drift so the header feels alive without ever asking to be watched. */
+  background-size: 210% 210%;
+  animation: drift 18s ease-in-out infinite alternate;
+}
+@keyframes drift {
+  from { background-position: 0% 50%; }
+  to   { background-position: 100% 50%; }
 }
 .appbar {
   padding: 14px 20px 18px;
@@ -155,8 +162,24 @@ main {
   -webkit-overflow-scrolling: touch;
 }
 .tabpanel[hidden] { display: none; }
-.tabpanel { animation: rise .22s ease both; }
-@keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+
+/* Screens populate top-down, the way a list binds when a real screen opens,
+   rather than the whole panel fading in as one slab. */
+.tabpanel > * { animation: rise .38s cubic-bezier(.2, .7, .3, 1) both; }
+.tabpanel > *:nth-child(1)  { animation-delay: .00s; }
+.tabpanel > *:nth-child(2)  { animation-delay: .035s; }
+.tabpanel > *:nth-child(3)  { animation-delay: .07s; }
+.tabpanel > *:nth-child(4)  { animation-delay: .105s; }
+.tabpanel > *:nth-child(5)  { animation-delay: .14s; }
+.tabpanel > *:nth-child(6)  { animation-delay: .175s; }
+.tabpanel > *:nth-child(7)  { animation-delay: .21s; }
+.tabpanel > *:nth-child(8)  { animation-delay: .245s; }
+.tabpanel > *:nth-child(9)  { animation-delay: .28s; }
+.tabpanel > *:nth-child(n+10) { animation-delay: .315s; }
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
 
 h2.sec {
   margin: 6px 2px 10px;
@@ -242,11 +265,32 @@ h2.sec::after {
 
 /* ---------- bottom navigation ---------- */
 nav {
+  position: relative;
   display: grid; grid-template-columns: repeat(4, 1fr);
   border-top: 1px solid var(--line);
   background: var(--surface);
   padding-bottom: var(--safe);
 }
+/* Material-style sliding indicator: one bar that travels, so the change of tab
+   is a movement rather than a swap. JS sets its width and offset. */
+.tab-ind {
+  position: absolute; top: -1px; left: 0; height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  border-radius: 0 0 3px 3px;
+  transition: transform .34s cubic-bezier(.4, 0, .2, 1), width .34s cubic-bezier(.4, 0, .2, 1);
+  pointer-events: none;
+}
+/* The per-button pill is the no-JS fallback; once the sliding bar exists it goes. */
+nav.has-ind .pill { opacity: 0; }
+
+/* Press ripple — the single most Android-feeling affordance on the page. */
+.row { position: relative; overflow: hidden; }
+.ripple {
+  position: absolute; border-radius: 50%; pointer-events: none;
+  background: var(--accent); opacity: .22; transform: scale(0);
+  animation: ripple .58s cubic-bezier(.2, .7, .3, 1) forwards;
+}
+@keyframes ripple { to { transform: scale(2.6); opacity: 0; } }
 nav button {
   appearance: none; border: 0; background: none; cursor: pointer;
   padding: 9px 2px 11px; color: var(--text-dim);
@@ -285,9 +329,15 @@ footer.legal a { color: inherit; }
   .screen { border-radius: 0; height: 100vh; height: 100dvh; }
   footer.legal { display: none; }
 }
+/* Everything above is motion for its own sake to someone who cannot tolerate it.
+   One block turns all of it off. */
 @media (prefers-reduced-motion: reduce) {
-  .tabpanel { animation: none; }
-  .row { transition: none; }
+  .tabpanel > *,
+  .hero { animation: none !important; }
+  .row, .chip, .card, .row .go, .row .ico, nav button svg, .tab-ind {
+    transition: none !important;
+  }
+  .ripple { display: none; }
 }
 </style>
 </head>
@@ -599,17 +649,58 @@ footer.legal a { color: inherit; }
 (function () {
   var tabs = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
   var main = document.querySelector('main');
+  var nav = document.querySelector('nav');
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  // Sliding indicator. Built in JS so that with scripting off the per-button
+  // pill still marks the active tab instead of leaving no indicator at all.
+  var ind = document.createElement('div');
+  ind.className = 'tab-ind';
+  nav.appendChild(ind);
+  nav.classList.add('has-ind');
+
+  function moveIndicator(tab) {
+    ind.style.width = tab.offsetWidth + 'px';
+    ind.style.transform = 'translateX(' + tab.offsetLeft + 'px)';
+  }
 
   function select(tab) {
     tabs.forEach(function (t) {
       var on = t === tab;
       t.setAttribute('aria-selected', on ? 'true' : 'false');
-      document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+      var panel = document.getElementById(t.getAttribute('aria-controls'));
+      panel.hidden = !on;
+      // Re-trigger the stagger: without clearing the animation the children
+      // keep their finished state and the screen appears without populating.
+      if (on && !reduced.matches) {
+        Array.prototype.forEach.call(panel.children, function (el) {
+          el.style.animation = 'none';
+          void el.offsetHeight; // force reflow so the restart takes
+          el.style.animation = '';
+        });
+      }
     });
+    moveIndicator(tab);
     main.scrollTop = 0;
     // Keep the tab in the URL so a section can be linked and reloaded.
     try { history.replaceState(null, '', '#' + tab.id.replace('t-', '')); } catch (e) {}
   }
+
+  // Ripple from the actual press point, sized to cover the row.
+  document.addEventListener('pointerdown', function (e) {
+    if (reduced.matches) return;
+    var row = e.target.closest && e.target.closest('.row');
+    if (!row) return;
+    var r = row.getBoundingClientRect();
+    var size = Math.max(r.width, r.height) * 1.1;
+    var s = document.createElement('span');
+    s.className = 'ripple';
+    s.style.width = s.style.height = size + 'px';
+    s.style.left = (e.clientX - r.left - size / 2) + 'px';
+    s.style.top = (e.clientY - r.top - size / 2) + 'px';
+    row.appendChild(s);
+    setTimeout(function () { s.remove(); }, 600);
+  }, { passive: true });
 
   tabs.forEach(function (tab, i) {
     tab.addEventListener('click', function () { select(tab); });
@@ -625,10 +716,17 @@ footer.legal a { color: inherit; }
   });
 
   var want = (location.hash || '').replace('#', '');
-  if (want) {
-    var match = document.getElementById('t-' + want);
-    if (match) select(match);
-  }
+  var initial = (want && document.getElementById('t-' + want)) || tabs[0];
+  select(initial);
+
+  // The indicator is measured, so it has to be re-measured when the layout
+  // changes — orientation, window resize, or the frame dropping away at 520px.
+  var reposition = function () {
+    var current = tabs.filter(function (t) { return t.getAttribute('aria-selected') === 'true'; })[0];
+    if (current) moveIndicator(current);
+  };
+  window.addEventListener('resize', reposition, { passive: true });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(reposition);
 })();
 </script>
 </body>
